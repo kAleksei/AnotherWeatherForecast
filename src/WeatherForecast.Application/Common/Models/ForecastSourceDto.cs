@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace WeatherForecast.Application.Common.Models;
 
 /// <summary>
