@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using WeatherForecast.Application.Common.Models;
 using WeatherForecast.Domain.Entities;
 using WeatherForecast.Domain.ValueObjects;
@@ -20,7 +21,14 @@ public static class MappingExtensions
             TemperatureCelsius = source.Temperature?.Celsius,
             HumidityPercent = source.Humidity?.Percent,
             Available = source.Available,
-            Error = source.Error,
+            ProblemDetails = source.Error != null 
+                ? new ProblemDetails 
+                { 
+                    Title = "Source Unavailable", 
+                    Detail = source.Error,
+                    Status = 503
+                } 
+                : null,
             RetrievedAt = source.RetrievedAt
         };
     }
