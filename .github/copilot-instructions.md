@@ -477,12 +477,17 @@ The project follows Clean Architecture and Domain-Driven Design principles as ou
 
 This repository has custom agents configured in `.github/agents/`:
 
-- **CSharpExpert**: C# development guidance
+- **address-comments**: Address PR comments and feedback
+- **adr-generator**: Create comprehensive Architectural Decision Records
 - **azure-principal-architect**: Azure architecture decisions
 - **azure-saas-architect**: SaaS architecture patterns
+- **CSharpExpert**: C# development guidance
 - **csharp-dotnet-janitor**: Code cleanup and modernization
 - **plan**: Strategic planning and implementation
 - **principal-software-engineer**: Software engineering best practices
+- **prd**: Generate Product Requirements Documents
+- **task-researcher**: Comprehensive project analysis
+- **wg-code-alchemist**: Code transformation with Clean Code principles
 
 Use these agents via GitHub Copilot when working on specific tasks related to their expertise.
 
