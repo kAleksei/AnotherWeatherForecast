@@ -20,7 +20,7 @@ status: Planned
 | TASK-027 | Create `ResponseMetadata` DTO in `src/WeatherForecast.Application/Common/Models/ResponseMetadata.cs` with TotalSources, AvailableSources, CacheHit, ResponseTimeMs | | |
 | TASK-028 | Create `IWeatherSourceProvider` interface in `src/WeatherForecast.Application/Common/Interfaces/IWeatherSourceProvider.cs` with methods: `Task<ForecastSource> GetForecastAsync`, `WeatherSourceType SourceType`, `bool IsEnabled` | | |
 | TASK-029 | Create `IWeatherAggregationService` interface in `src/WeatherForecast.Application/Common/Interfaces/IWeatherAggregationService.cs` with method: `Task<WeatherForecastResponse> GetAggregatedForecastAsync` | | |
-| TASK-030 | Create `WeatherForecastRequestValidator` in `src/WeatherForecast.Application/Validators/WeatherForecastRequestValidator.cs` using FluentValidation: validate date range (Â±7 days), required fields, country code format | | |
+| TASK-030 | Create `WeatherForecastRequestValidator` in `src/WeatherForecast.Application/Validators/WeatherForecastRequestValidator.cs` using FluentValidation: validate single date (+7 days from today and no limitation to past), required fields, country code format | | |
 | TASK-031 | Install NuGet packages in Application project: `FluentValidation`, `FluentValidation.DependencyInjectionExtensions`, `AutoMapper`, `MediatR` | | |
 | TASK-032 | Create AutoMapper profile `MappingProfile` in `src/WeatherForecast.Application/Common/Mappings/MappingProfile.cs` for Entity â†” DTO mappings | | |
 

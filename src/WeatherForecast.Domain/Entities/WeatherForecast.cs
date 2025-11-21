@@ -22,7 +22,7 @@ public class WeatherForecast
     /// <summary>
     /// Gets the collection of forecast sources.
     /// </summary>
-    public IReadOnlyList<ForecastSource> Sources => _sources.AsReadOnly();
+    public IReadOnlyCollection<ForecastSource> Sources => _sources.AsReadOnly();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WeatherForecast"/> class.
@@ -47,45 +47,5 @@ public class WeatherForecast
     {
         ArgumentNullException.ThrowIfNull(source);
         _sources.Add(source);
-    }
-
-    /// <summary>
-    /// Calculates the average temperature and humidity from all available sources.
-    /// </summary>
-    /// <returns>A tuple containing the average temperature and humidity, or null values if no data is available.</returns>
-    public (Temperature? AverageTemperature, Humidity? AverageHumidity) CalculateAverage()
-    {
-        var availableSources = _sources.Where(s => s.Available).ToList();
-
-        if (availableSources.Count == 0)
-        {
-            return (null, null);
-        }
-
-        var temperaturesWithData = availableSources
-            .Where(s => s.Temperature != null)
-            .Select(s => s.Temperature!)
-            .ToList();
-
-        var humiditiesWithData = availableSources
-            .Where(s => s.Humidity != null)
-            .Select(s => s.Humidity!)
-            .ToList();
-
-        Temperature? avgTemperature = null;
-        if (temperaturesWithData.Count > 0)
-        {
-            var avgCelsius = temperaturesWithData.Average(t => t.Celsius);
-            avgTemperature = new Temperature(avgCelsius);
-        }
-
-        Humidity? avgHumidity = null;
-        if (humiditiesWithData.Count > 0)
-        {
-            var avgPercent = humiditiesWithData.Average(h => h.Percent);
-            avgHumidity = new Humidity(avgPercent);
-        }
-
-        return (avgTemperature, avgHumidity);
     }
 }

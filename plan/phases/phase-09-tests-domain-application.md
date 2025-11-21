@@ -20,8 +20,8 @@ status: Planned
 | TASK-104 | Test Humidity value object: valid range (0-100), invalid ranges throw exception, equality comparison | | |
 | TASK-105 | Create `LocationTests` in `tests/WeatherForecast.Domain.Tests/ValueObjects/LocationTests.cs` | | |
 | TASK-106 | Test Location value object: valid city/country, empty values throw exception, country code format validation | | |
-| TASK-107 | Create `DateRangeTests` in `tests/WeatherForecast.Domain.Tests/ValueObjects/DateRangeTests.cs` | | |
-| TASK-108 | Test DateRange value object: Â±7 days validation, dates beyond range throw exception | | |
+| TASK-107 | Remove DateRange tests. No longer required. | ✅ | 2025-11-21 |
+| TASK-108 | Remove DateRange validation tests. Now validate single date property (±7 days from today) in request and domain model. | ✅ | 2025-11-21 |
 | TASK-109 | Create `WeatherForecastTests` in `tests/WeatherForecast.Domain.Tests/Entities/WeatherForecastTests.cs` | | |
 | TASK-110 | Test WeatherForecast aggregate: AddSource method, CalculateAverage with all sources, CalculateAverage with partial sources | | |
 | TASK-111 | Create `WeatherAggregationServiceTests` in `tests/WeatherForecast.Application.Tests/Services/WeatherAggregationServiceTests.cs` | | |
@@ -34,7 +34,7 @@ status: Planned
 | TASK-118 | Test source filtering: provide sources parameter, verify only specified providers called | | |
 | TASK-119 | Create `WeatherForecastRequestValidatorTests` in `tests/WeatherForecast.Application.Tests/Validators/WeatherForecastRequestValidatorTests.cs` | | |
 | TASK-120 | Test valid request: date within range, required fields present | | |
-| TASK-121 | Test invalid date range: date >7 days future, date >7 days past | | |
+| TASK-121 | Test invalid date: date >7 days future, date >7 days past | | |
 | TASK-122 | Test missing required fields: city, country | | |
 | TASK-123 | Test invalid country code format | | |
 

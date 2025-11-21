@@ -1,4 +1,3 @@
-using WeatherForecast.Domain.Enums;
 using WeatherForecast.Domain.ValueObjects;
 
 namespace WeatherForecast.Domain.Entities;
@@ -11,12 +10,7 @@ public class ForecastSource
     /// <summary>
     /// Gets the name of the weather data source.
     /// </summary>
-    public string Name { get; }
-
-    /// <summary>
-    /// Gets the type of the weather data source.
-    /// </summary>
-    public WeatherSourceType SourceType { get; }
+    public string SourceName { get; }
 
     /// <summary>
     /// Gets the temperature from this source, if available.
@@ -46,8 +40,7 @@ public class ForecastSource
     /// <summary>
     /// Initializes a new instance of the <see cref="ForecastSource"/> class.
     /// </summary>
-    /// <param name="name">The name of the weather data source.</param>
-    /// <param name="sourceType">The type of the weather data source.</param>
+    /// <param name="sourceName">The name of the weather data source.</param>
     /// <param name="temperature">The temperature from this source.</param>
     /// <param name="humidity">The humidity from this source.</param>
     /// <param name="available">Whether this source is available.</param>
@@ -55,23 +48,19 @@ public class ForecastSource
     /// <param name="retrievedAt">The timestamp when the data was retrieved.</param>
     /// <exception cref="ArgumentException">Thrown when name is empty.</exception>
     public ForecastSource(
-        string name,
-        WeatherSourceType sourceType,
+        string sourceName,
         Temperature? temperature,
         Humidity? humidity,
         bool available,
         string? error,
         DateTime retrievedAt)
     {
-        ArgumentNullException.ThrowIfNull(name);
-
-        if (string.IsNullOrWhiteSpace(name))
+        if (string.IsNullOrWhiteSpace(sourceName))
         {
-            throw new ArgumentException("Name cannot be empty or whitespace.", nameof(name));
+            throw new ArgumentException("Source name cannot be null or empty.", nameof(sourceName));
         }
 
-        Name = name.Trim();
-        SourceType = sourceType;
+        SourceName = sourceName;
         Temperature = temperature;
         Humidity = humidity;
         Available = available;
