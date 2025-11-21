@@ -6,6 +6,11 @@ using OpenTelemetry.Trace;
 
 namespace WeatherForecast.Application.Common.Behaviors;
 
+/// <summary>
+/// MediatR pipeline behavior that provides logging and distributed tracing for requests.
+/// </summary>
+/// <typeparam name="TRequest">The type of request being logged.</typeparam>
+/// <typeparam name="TResponse">The type of response expected from the request handler.</typeparam>
 public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
