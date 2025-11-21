@@ -19,6 +19,4 @@ status: Planned
 | TASK-036 | Implement source filtering logic in `WeatherAggregationService`: if sources parameter provided, filter provider list | | |
 | TASK-037 | Implement aggregation logic: calculate average temperature/humidity from available sources, handle partial failures | | |
 | TASK-038 | Create `ValidationBehavior<TRequest, TResponse>` in `src/WeatherForecast.Application/Common/Behaviors/ValidationBehavior.cs` using FluentValidation with MediatR pipeline | | |
-| TASK-039 | Create `LoggingBehavior<TRequest, TResponse>` in `src/WeatherForecast.Application/Common/Behaviors/LoggingBehavior.cs` for request/response logging with timing | | |
-| TASK-040 | Create `DependencyInjection.cs` in `src/WeatherForecast.Application/DependencyInjection.cs` with extension method `AddApplication(IServiceCollection)` registering services, validators, AutoMapper, MediatR behaviors | | |
 

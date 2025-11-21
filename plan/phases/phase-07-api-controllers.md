@@ -18,7 +18,6 @@ status: Planned
 | TASK-070 | Implement `GetForecast` action: `[HttpGet("forecast")]` accepting query parameters: date, city, country, sources (optional) | | |
 | TASK-071 | Inject `IWeatherAggregationService` and `IValidator<WeatherForecastRequest>` into controller constructor | | |
 | TASK-072 | Implement validation in action: call validator, return `BadRequest(errors)` if validation fails | | |
-| TASK-073 | Call aggregation service, measure response time using `Stopwatch`, return `Ok(response)` | | |
 | TASK-074 | Add XML documentation comments for Swagger: `/// <summary>`, `/// <param>`, `/// <response>` | | |
 | TASK-075 | Create `ExceptionHandlingMiddleware` in `src/WeatherForecast.Api/Middleware/ExceptionHandlingMiddleware.cs` implementing global exception handler | | |
 | TASK-076 | Implement exception handling: catch all exceptions, log with Serilog, return ProblemDetails (RFC 7807) with status 500 | | |

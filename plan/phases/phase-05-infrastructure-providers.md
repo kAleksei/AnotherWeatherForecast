@@ -22,6 +22,5 @@ status: Planned
 | TASK-047 | Create `OpenWeatherMapProvider` in `src/WeatherForecast.Infrastructure/ExternalServices/OpenWeatherMapProvider.cs` implementing `IWeatherSourceProvider` | | |
 | TASK-048 | Implement OpenWeatherMap integration: endpoint `https://api.openweathermap.org/data/2.5/forecast` or `onecall/timemachine`, API key authentication | | |
 | TASK-049 | Configure Polly policies for all HTTP clients: Retry (3 attempts, exponential backoff), Circuit Breaker (3 failures, 30s break), Timeout (5s) | | |
-| TASK-050 | Implement error handling in each provider: catch HttpRequestException, TimeoutException, map to ForecastSource with Available=false and Error message | | |
 | TASK-051 | Add structured logging in each provider: log request start, success, failure with correlation IDs | | |
 

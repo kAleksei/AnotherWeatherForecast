@@ -654,7 +654,6 @@ This implementation plan defines the complete development, testing, and deployme
 - **FILE-019**: `src/WeatherForecast.Application/Common/Models/ForecastSourceDto.cs` - Forecast source DTO
 - **FILE-020**: `src/WeatherForecast.Application/Common/Models/AggregatedForecastDto.cs` - Aggregated forecast DTO
 - **FILE-021**: `src/WeatherForecast.Application/Common/Models/WeatherForecastResponse.cs` - API response DTO
-- **FILE-022**: `src/WeatherForecast.Application/Common/Models/ResponseMetadata.cs` - Response metadata DTO
 - **FILE-023**: `src/WeatherForecast.Application/Common/Interfaces/IWeatherSourceProvider.cs` - Weather source provider interface
 - **FILE-024**: `src/WeatherForecast.Application/Common/Interfaces/IWeatherAggregationService.cs` - Aggregation service interface
 - **FILE-025**: `src/WeatherForecast.Application/Common/Behaviors/ValidationBehavior.cs` - MediatR validation behavior
