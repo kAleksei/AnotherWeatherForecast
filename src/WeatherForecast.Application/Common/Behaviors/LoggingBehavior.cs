@@ -31,14 +31,11 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
         using var activity = TelemetryConstants.ActivitySource.StartActivity($"MediatR.{requestName}", ActivityKind.Internal);
         activity?.SetTag("request.type", requestName);
 
-        _logger.LogInformation("Handling {RequestName}", requestName);
-
         try
         {
             var response = await next();
             
             activity?.SetStatus(ActivityStatusCode.Ok);
-            _logger.LogInformation("Handled {RequestName}", requestName);
 
             return response;
         }
