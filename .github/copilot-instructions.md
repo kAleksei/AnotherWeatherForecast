@@ -492,6 +492,5 @@ For questions or issues:
 
 1. Check this instructions file first
 2. Review the implementation plan in `plan/feature-weather-aggregation-microservice-1.md`
-3. Consult the ADRs in `docs/adr/`
-4. Use the custom agents for specialized guidance
-5. Refer to the official documentation links above
+3. Use the custom agents for specialized guidance
+4. Refer to the official documentation links above
