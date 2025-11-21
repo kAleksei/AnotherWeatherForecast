@@ -427,15 +427,7 @@ Required secrets for CI/CD:
 
 ## Architecture Decision Records (ADRs)
 
-Significant architectural decisions are documented in `docs/adr/`:
-
-- **ADR-001**: Use Clean Architecture with DDD
-- **ADR-002**: Two-Level Hybrid Caching Strategy
-- **ADR-003**: No API Versioning in V1
-- **ADR-004**: Azure Container Apps vs App Service
-- **ADR-005**: Free Weather API Sources Selection
-
-When making significant architectural changes, create a new ADR following the existing format.
+The project follows Clean Architecture and Domain-Driven Design principles as outlined in the implementation plan (`plan/feature-weather-aggregation-microservice-1.md`). Significant architectural decisions should be documented as ADRs in a `docs/adr/` directory when needed.
 
 ## Security Best Practices
 
