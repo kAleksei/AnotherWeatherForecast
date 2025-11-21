@@ -454,9 +454,9 @@ The project follows Clean Architecture and Domain-Driven Design principles as ou
 
 ### Official Documentation
 
-- [Clean Architecture in ASP.NET Core](https://docs.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/)
-- [.NET 8 Documentation](https://docs.microsoft.com/en-us/dotnet/core/)
-- [Azure Container Apps](https://docs.microsoft.com/en-us/azure/container-apps/)
+- [Clean Architecture in ASP.NET Core](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/)
+- [.NET 8 Documentation](https://learn.microsoft.com/en-us/dotnet/core/)
+- [Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/)
 
 ### Design Patterns
 
