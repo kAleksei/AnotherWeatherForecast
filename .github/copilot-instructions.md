@@ -310,7 +310,7 @@ public void MethodName_StateUnderTest_ExpectedBehavior()
 
 ```csharp
 [Fact]
-public void GetForecastAsync_WithValidLocation_ReturnsSuccessfulForecast()
+public async Task GetForecastAsync_WithValidLocation_ReturnsSuccessfulForecast()
 {
     // Arrange
     var location = new Location("London", "GB");
