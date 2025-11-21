@@ -13,7 +13,7 @@ status: Planned
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-014 | Create `WeatherSourceType` enum in `src/WeatherForecast.Domain/Enums/WeatherSourceType.cs` with values: OpenMeteo, WeatherAPI, OpenWeatherMap | | |
+| TASK-014 | ~~Create `WeatherSourceType` enum~~ - REMOVED: Use string-based source names instead for better extensibility | ✅ | 2025-11-21 |
 | TASK-015 | Create `Temperature` value object in `src/WeatherForecast.Domain/ValueObjects/Temperature.cs` with Celsius property, validation (range -100 to 60), equality comparison | | |
 | TASK-016 | Create `Humidity` value object in `src/WeatherForecast.Domain/ValueObjects/Humidity.cs` with Percent property, validation (range 0-100), equality comparison | | |
 | TASK-017 | Create `Location` value object in `src/WeatherForecast.Domain/ValueObjects/Location.cs` with City and Country properties, validation (non-empty, country ISO 3166-1 alpha-2) | | |

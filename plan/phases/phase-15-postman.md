@@ -29,8 +29,6 @@ status: Planned
 | TASK-213 | Add tests to Invalid Date: validate status 400, validate error message contains "7 days" | | |
 | TASK-214 | Create folder "Cache Behavior" with request "GET First Request" - same as Aggregated Forecast | | |
 | TASK-215 | Add tests to First Request: validate metadata.cacheHit = false | | |
-| TASK-216 | Create request "GET Second Request" - duplicate of First Request | | |
-| TASK-217 | Add tests to Second Request: validate metadata.cacheHit = true, validate responseTimeMs < first request | | |
 | TASK-218 | Create folder "Error Scenarios" with request "GET Missing Required Parameters" - omit city parameter | | |
 | TASK-219 | Add tests to Missing Required Parameters: validate status 400, validate errors object contains "city" | | |
 | TASK-220 | Create request "GET Invalid Country Code" with country = "INVALID" | | |
