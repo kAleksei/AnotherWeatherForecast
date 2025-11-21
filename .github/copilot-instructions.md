@@ -226,6 +226,9 @@ Always ensure:
   ```csharp
   [ApiController]
   [Route("api/[controller]")]
+  /// <summary>
+  /// Controller for aggregating weather forecasts from multiple sources.
+  /// </summary>
   public class WeatherController : ControllerBase
   {
       /// <summary>
