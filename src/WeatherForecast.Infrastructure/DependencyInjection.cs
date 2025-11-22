@@ -43,18 +43,21 @@ public static class DependencyInjection
         string sourceName)
         where TSourceProvider : class, IWeatherSourceProvider
     {
-        var options = configuration.GetSection("WeatherSources")
-            .GetValue<WeatherSourceOptions>(sourceName);
-
         services.Configure<WeatherSourceOptions>(
             sourceName,
             configuration.GetSection($"WeatherSources:{sourceName}"));
         services.AddHttpClient<TSourceProvider>();
         services.DecorateWithCache<TSourceProvider>();
-        services.AddKeyedSingleton(sourceName, CreateResiliencePipeline(
-            sourceName,
-            options.TimeoutSeconds,
-            services.BuildServiceProvider().GetRequiredService<ILogger<ResiliencePipeline>>()));
+        
+        // Register keyed resilience pipeline factory
+        services.AddKeyedSingleton<ResiliencePipeline>(sourceName, (serviceProvider, key) =>
+        {
+            var logger = serviceProvider.GetRequiredService<ILogger<ResiliencePipeline>>();
+            var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<WeatherSourceOptions>>();
+            var options = optionsMonitor.Get(sourceName);
+            
+            return CreateResiliencePipeline(sourceName, options.TimeoutSeconds, logger);
+        });
     }
 
     private static IServiceCollection DecorateWithCache<TImplementation>(
