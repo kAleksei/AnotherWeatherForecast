@@ -12,7 +12,7 @@ tags: [feature, architecture, infrastructure, microservice, azure, docker]
 
 ![Status: Planned](https://img.shields.io/badge/status-Planned-blue)
 
-This implementation plan defines the complete development, testing, and deployment of a production-grade dockerized .NET 8 microservice that aggregates weather forecasts from multiple free API sources. The service implements Clean Architecture with Domain-Driven Design principles, includes comprehensive caching (hybrid memory + Redis), observability (OTEL + structured logging), health checks with degradation support, and automated CI/CD deployment to Azure Container Apps with full Infrastructure as Code (Bicep templates).
+This implementation plan defines the complete development, testing, and deployment of a production-grade dockerized .NET 8 microservice that aggregates weather forecasts from multiple free API sources. The service implements Clean Architecture with Domain-Driven Design principles, includes comprehensive caching (hybrid memory + Redis), observability (OTEL + structured logging), resilience policies for external APIs, and automated CI/CD deployment to Azure Container Apps with full Infrastructure as Code (Bicep templates).
 
 ## 1. Requirements & Constraints
 
@@ -45,14 +45,6 @@ This implementation plan defines the complete development, testing, and deployme
 - **REQ-019**: Custom metrics: source availability rate, cache hit ratio, aggregation response time
 - **REQ-020**: Custom spans for each weather source API call and cache operations
 
-### Health Check Requirements
-
-- **REQ-021**: Implement `/health`, `/health/ready`, `/health/live` endpoints
-- **REQ-022**: Parallel health checks for all weather sources
-- **REQ-023**: Redis cache health check with ping
-- **REQ-024**: Return "Degraded" status (HTTP 200) if 1+ sources unavailable but service functional
-- **REQ-025**: Return "Unhealthy" status (HTTP 503) only if all sources unavailable
-
 ### Architecture Requirements
 
 - **REQ-026**: Clean Architecture with 4 layers: Domain, Application, Infrastructure, API
@@ -82,7 +74,6 @@ This implementation plan defines the complete development, testing, and deployme
 - **REQ-041**: Multi-stage Dockerfile with build, publish, and runtime stages
 - **REQ-042**: Base images: `mcr.microsoft.com/dotnet/sdk:8.0` (build), `mcr.microsoft.com/dotnet/aspnet:8.0` (runtime)
 - **REQ-043**: Non-root user execution in container
-- **REQ-044**: Health check in Dockerfile: `curl --fail http://localhost:8080/health`
 - **REQ-045**: Docker Compose for local development with Redis service
 - **REQ-046**: Optimized image size with proper `.dockerignore`
 
@@ -102,7 +93,6 @@ This implementation plan defines the complete development, testing, and deployme
 - **REQ-055**: Azure authentication via OIDC (Workload Identity Federation)
 - **REQ-056**: Rolling deployment strategy with zero downtime
 - **REQ-057**: Post-deployment smoke tests against deployed endpoint
-- **REQ-058**: Rollback on failed health checks
 
 ### API Documentation Requirements
 
@@ -113,7 +103,7 @@ This implementation plan defines the complete development, testing, and deployme
 ### Postman Collection Requirements
 
 - **REQ-062**: Postman Collection v2.1 JSON format
-- **REQ-063**: Folders: Health Checks, Weather Forecast, Cache Behavior, Error Scenarios
+- **REQ-063**: Folders: Weather Forecast, Cache Behavior, Error Scenarios
 - **REQ-064**: Environment variables: `baseUrl`, `date`, `city`, `country`
 - **REQ-065**: Test assertions for all requests (status code, schema validation, business logic)
 - **REQ-066**: Pre-request scripts for dynamic date generation
@@ -261,28 +251,6 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-056 | Register HybridCache in DependencyInjection: `services.AddHybridCache()` | | |
 | TASK-057 | Wrap each weather provider with `CachedWeatherSourceProvider` in DI registration | | |
 | TASK-058 | Remove `ICacheRepository` dependency from `WeatherAggregationService` | | |
-### Implementation Phase 7: Infrastructure Layer - Health Checks
-
-**GOAL-007**: Implement comprehensive health checks with degradation support
-
-| Task | Description | Completed | Date |
-|------|-------------|-----------|------|
-| TASK-059 | Create `WeatherSourceHealthCheck` in `src/WeatherForecast.Infrastructure/ExternalServices/WeatherSourceHealthCheck.cs` implementing `IHealthCheck` | | |
-| TASK-060 | Implement parallel health checks for all weather sources: test HTTP connectivity, API validity | | |
-| TASK-061 | Implement health check logic: Healthy (all sources OK), Degraded (1+ sources down), Unhealthy (all sources down) | | |
-| TASK-062 | Create `DependencyInjection.cs` in `src/WeatherForecast.Infrastructure/DependencyInjection.cs` (if not exists) to register health checks | | |
-| TASK-063 | Register weather providers as singletons with caching decorators in `DependencyInjection.cs` | | |
-| TASK-064 | Register HybridCache: `services.AddHybridCache()` | | |
-| TASK-065 | Register health checks: `services.AddHealthChecks().AddCheck<WeatherSourceHealthCheck>()` | | |
-| TASK-060 | Implement parallel health checks for all weather sources: test HTTP connectivity, API key validity | | |
-| TASK-061 | Implement health check logic: Healthy (all sources OK), Degraded (1+ sources down), Unhealthy (all sources down) | | |
-| TASK-062 | Create `RedisHealthCheck` in `src/WeatherForecast.Infrastructure/Caching/RedisHealthCheck.cs`: ping Redis, return Healthy/Unhealthy | | |
-| TASK-063 | Create `DependencyInjection.cs` in `src/WeatherForecast.Infrastructure/DependencyInjection.cs` with `AddInfrastructure(IServiceCollection, IConfiguration)` extension method | | |
-| TASK-064 | Register weather providers as singletons with named HttpClients in `DependencyInjection.cs` | | |
-| TASK-065 | Register Redis connection: `services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(connectionString))` | | |
-| TASK-066 | Register memory cache: `services.AddMemoryCache(options => options.SizeLimit = configSizeMB)` | | |
-| TASK-067 | Register health checks: `services.AddHealthChecks().AddCheck<WeatherSourceHealthCheck>().AddCheck<RedisHealthCheck>()` | | |
-
 ### Implementation Phase 7: API Layer - Controllers, Middleware, and Configuration
 
 **GOAL-007**: Implement REST API endpoint, exception handling middleware, and API configuration
@@ -303,8 +271,6 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-079 | Create `OpenTelemetryExtensions` in `src/WeatherForecast.Api/Extensions/OpenTelemetryExtensions.cs` with `AddOpenTelemetryObservability` extension method | ✅ | 2025-11-22 |
 | TASK-080 | Configure OTEL instrumentation: ASP.NET Core, HttpClient, Redis (StackExchange.Redis) | ✅ | 2025-11-22 |
 | TASK-081 | Configure OTEL exporters: Azure Monitor (production), Console (development) based on environment | ✅ | 2025-11-22 |
-| TASK-082 | Create `HealthCheckExtensions` in `src/WeatherForecast.Api/Extensions/HealthCheckExtensions.cs` with `AddHealthCheckEndpoints` extension method | ✅ | 2025-11-22 |
-| TASK-083 | Map health check endpoints in extension: `/health` (detailed), `/health/ready` (readiness), `/health/live` (liveness) | ✅ | 2025-11-22 |
 
 ### Implementation Phase 8: API Layer - Program.cs and Configuration Files
 
@@ -319,7 +285,7 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-088 | Register Swagger: `builder.Services.AddEndpointsApiExplorer()`, `builder.Services.AddSwaggerGen(options => configure XML comments)` | | |
 | TASK-089 | Register OpenTelemetry: `builder.Services.AddOpenTelemetryObservability(builder.Configuration)` | | |
 | TASK-090 | Build app: `var app = builder.Build();` | | |
-| TASK-091 | Configure middleware pipeline: (1) ExceptionHandling (2) RequestLogging (3) Swagger (dev only) (4) HTTPS redirection (5) MapControllers (6) Health checks | | |
+| TASK-091 | Configure middleware pipeline: (1) ExceptionHandling (2) RequestLogging (3) Swagger (dev only) (4) HTTPS redirection (5) MapControllers | | |
 | TASK-092 | Run app: `app.Run();` | | |
 | TASK-093 | Create `appsettings.json` in `src/WeatherForecast.Api/appsettings.json` with sections: Logging, WeatherSources, CacheSettings, ConnectionStrings, HealthCheckSettings | | |
 | TASK-094 | Configure WeatherSources section: OpenMeteo (BaseUrl, TimeoutSeconds), WeatherAPI (BaseUrl, ApiKey, TimeoutSeconds), OpenWeatherMap (BaseUrl, ApiKey, TimeoutSeconds) | | |
@@ -362,7 +328,7 @@ This implementation plan defines the complete development, testing, and deployme
 
 ### Implementation Phase 10: Unit Tests - Infrastructure Layer
 
-**GOAL-010**: Implement unit tests for weather providers, caching service, and health checks
+**GOAL-010**: Implement unit tests for weather providers and caching service
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
@@ -395,7 +361,6 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-143 | Runtime stage: FROM `mcr.microsoft.com/dotnet/aspnet:8.0` AS final, WORKDIR /app | | |
 | TASK-144 | Create non-root user: RUN `adduser --disabled-password --gecos '' appuser && chown -R appuser /app`, USER appuser | | |
 | TASK-145 | COPY from publish stage, EXPOSE 8080 | | |
-| TASK-146 | Add HEALTHCHECK: `--interval=30s --timeout=3s --start-period=5s --retries=3 CMD curl --fail http://localhost:8080/health || exit 1` | | |
 | TASK-147 | ENTRYPOINT ["dotnet", "WeatherForecast.Api.dll"] | | |
 | TASK-148 | Create `.dockerignore` in `c:\Projects\Home\AnotherWeatherForecast\.dockerignore` | | |
 | TASK-149 | Add to .dockerignore: `**/.git`, `**/.vs`, `**/.vscode`, `**/bin`, `**/obj`, `**/.gitignore`, `**/docker-compose*`, `**/Dockerfile*`, `**/*.md`, `**/secrets.json` | | |
@@ -403,7 +368,7 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-151 | Configure api service: build context, ports 5000:8080, environment variables (ASPNETCORE_ENVIRONMENT, ConnectionStrings__Redis, WeatherSources keys), depends_on redis | | |
 | TASK-152 | Configure redis service: image `redis:7-alpine`, ports 6379:6379, volume `redis-data:/data` | | |
 | TASK-153 | Test Docker build locally: `docker build -t weatherforecast:local .` | | |
-| TASK-154 | Test docker-compose locally: `docker-compose up`, verify API accessible at http://localhost:5000/health | | |
+| TASK-154 | Test docker-compose locally: `docker-compose up`, verify API accessible at http://localhost:5000/api/weather/forecast | | |
 
 ### Implementation Phase 12: Azure Infrastructure as Code (Bicep)
 
@@ -444,9 +409,9 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-178 | Create Job 4 "app-deploy": needs [docker-build-push, infrastructure-deploy], runs only on push to main | | |
 | TASK-179 | App deploy steps: Azure login, update Container App with new image (az containerapp update), wait for deployment | | |
 | TASK-180 | Create Job 5 "post-deploy-tests": needs app-deploy, runs only on push to main | | |
-| TASK-181 | Post-deploy test steps: health check curl (retry 5 times), smoke test GET /api/weather/forecast with valid parameters, validate response schema | | |
+| TASK-181 | Post-deploy test steps: smoke test GET /api/weather/forecast with valid parameters, validate response schema | | |
 | TASK-182 | Configure GitHub secrets requirements in README: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID, WEATHERAPI_KEY, OPENWEATHERMAP_KEY | | |
-| TASK-183 | Add rollback step in app-deploy: if health check fails after deployment, rollback to previous revision | | |
+| TASK-183 | Add rollback step in app-deploy: if smoke test fails after deployment, rollback to previous revision | | |
 
 ### Implementation Phase 14: Documentation - README and ADRs
 
@@ -463,7 +428,7 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-190 | Document Docker: build image, run container, environment variables reference | | |
 | TASK-191 | Document Azure deployment: prerequisites (Azure subscription, service principal), infrastructure deployment command, app deployment via GitHub Actions, access deployed API | | |
 | TASK-192 | Create environment variables reference table: name, description, required, default, example | | |
-| TASK-193 | Add troubleshooting section: common issues (Redis connection, API key invalid, health check degraded, container not starting) | | |
+| TASK-193 | Add troubleshooting section: common issues (Redis connection, API key invalid, container not starting, slow responses) | | |
 | TASK-194 | Create `docs\adr\` directory for Architecture Decision Records | | |
 | TASK-195 | Create ADR-001: "Use Clean Architecture with DDD" - context, decision, consequences, alternatives (layered, hexagonal) | | |
 | TASK-196 | Create ADR-002: "Two-Level Hybrid Caching Strategy" - context (performance, cost), decision (memory + Redis), consequences, alternatives (Redis only, memory only) | | |
@@ -479,8 +444,6 @@ This implementation plan defines the complete development, testing, and deployme
 |------|-------------|-----------|------|
 | TASK-200 | Create Postman Collection v2.1 JSON file: `c:\Projects\Home\AnotherWeatherForecast\postman\WeatherForecast.postman_collection.json` | | |
 | TASK-201 | Configure collection variables: `baseUrl` (http://localhost:5000), `date` ({{$isoTimestamp}}), `city` (London), `country` (GB) | | |
-| TASK-202 | Create folder "Health Checks" with requests: GET /health, GET /health/ready, GET /health/live | | |
-| TASK-203 | Add tests to health check requests: validate status 200, validate response schema (status, checks array) | | |
 | TASK-204 | Create folder "Weather Forecast" with request "GET Aggregated Forecast" - URL: `{{baseUrl}}/api/weather/forecast?date={{date}}&city={{city}}&country={{country}}` | | |
 | TASK-205 | Add tests to Aggregated Forecast: validate status 200, validate response schema (location, date, aggregatedForecast, sources array, metadata), validate aggregatedForecast.averageTemperatureCelsius is number, validate sources.length >= 3 | | |
 | TASK-206 | Create request "GET Filtered by Source" with sources parameter: `sources=OpenMeteo` | | |
@@ -681,9 +644,7 @@ This implementation plan defines the complete development, testing, and deployme
 - **FILE-034**: `src/WeatherForecast.Infrastructure/ExternalServices/OpenMeteoProvider.cs` - OpenMeteo API provider
 - **FILE-035**: `src/WeatherForecast.Infrastructure/ExternalServices/WeatherApiProvider.cs` - WeatherAPI.com provider
 - **FILE-036**: `src/WeatherForecast.Infrastructure/ExternalServices/OpenWeatherMapProvider.cs` - OpenWeatherMap provider
-- **FILE-037**: `src/WeatherForecast.Infrastructure/ExternalServices/WeatherSourceHealthCheck.cs` - Weather source health checks
 - **FILE-038**: `src/WeatherForecast.Infrastructure/Caching/HybridCacheService.cs` - Hybrid cache implementation
-- **FILE-039**: `src/WeatherForecast.Infrastructure/Caching/RedisHealthCheck.cs` - Redis health check
 - **FILE-040**: `src/WeatherForecast.Infrastructure/DependencyInjection.cs` - Infrastructure layer DI configuration
 
 ### API Layer Files
@@ -691,7 +652,6 @@ This implementation plan defines the complete development, testing, and deployme
 - **FILE-042**: `src/WeatherForecast.Api/Middleware/ExceptionHandlingMiddleware.cs` - Global exception handler
 - **FILE-043**: `src/WeatherForecast.Api/Middleware/RequestLoggingMiddleware.cs` - HTTP request/response logger
 - **FILE-044**: `src/WeatherForecast.Api/Extensions/OpenTelemetryExtensions.cs` - OpenTelemetry configuration
-- **FILE-045**: `src/WeatherForecast.Api/Extensions/HealthCheckExtensions.cs` - Health check endpoints configuration
 - **FILE-046**: `src/WeatherForecast.Api/Program.cs` - Application entry point and configuration
 - **FILE-047**: `src/WeatherForecast.Api/appsettings.json` - Application configuration (default)
 - **FILE-048**: `src/WeatherForecast.Api/appsettings.Development.json` - Development environment configuration
@@ -784,20 +744,15 @@ This implementation plan defines the complete development, testing, and deployme
 - **TEST-035**: HybridCacheService SetAsync Redis disabled - verify only L1 called when EnableDistributedCache=false
 - **TEST-036**: HybridCacheService Redis unavailable - verify fallback to L1 only, no exceptions thrown
 - **TEST-037**: HybridCacheService sliding expiration - verify Redis TTL refreshed on cache hit when SlidingExpiration=true
-- **TEST-038**: WeatherSourceHealthCheck all sources healthy - verify Healthy status returned
-- **TEST-039**: WeatherSourceHealthCheck partial degradation - 1-2 sources down, verify Degraded status returned
-- **TEST-040**: WeatherSourceHealthCheck all sources unhealthy - verify Unhealthy status returned
-- **TEST-041**: RedisHealthCheck Redis available - verify Healthy status when Redis ping succeeds
-- **TEST-042**: RedisHealthCheck Redis unavailable - verify Unhealthy status when Redis ping fails
 
 ## 7. Risks & Assumptions
 
 ### Risks
 - **RISK-001**: **Weather API rate limits exceeded** - If service becomes popular, free tier limits may be exceeded (OpenMeteo: 10k/day, WeatherAPI: 1M/month, OpenWeatherMap: 1k/day). **Mitigation**: Implement caching aggressively (1 hour TTL), monitor API usage, consider upgrading to paid tiers if needed
-- **RISK-002**: **Weather API service availability** - External APIs may experience downtime or breaking changes. **Mitigation**: Graceful degradation design, health checks with degraded status, multiple redundant sources
+- **RISK-002**: **Weather API service availability** - External APIs may experience downtime or breaking changes. **Mitigation**: Graceful degradation design, multiple redundant sources
 - **RISK-003**: **Azure free tier exhaustion** - Container Apps free tier (180k vCPU-seconds/month) may be insufficient for production load. **Mitigation**: Monitor usage, implement aggressive auto-scaling down to 0 replicas, upgrade to paid tier if needed
 - **RISK-004**: **Cache consistency issues** - Cached data may become stale if weather conditions change rapidly. **Mitigation**: Appropriate TTL configuration (15 min memory, 60 min Redis), document cache behavior in API docs
-- **RISK-005**: **Redis connection failures** - Redis unavailability could impact cache performance. **Mitigation**: Hybrid cache with fallback to memory-only mode, Redis health check
+- **RISK-005**: **Redis connection failures** - Redis unavailability could impact cache performance. **Mitigation**: Hybrid cache with fallback to memory-only mode and retry logic
 - **RISK-006**: **Geocoding accuracy** - Converting city names to coordinates may be ambiguous (e.g., "Springfield" exists in multiple countries). **Mitigation**: Require country parameter, use first match from geocoding API, document limitation
 - **RISK-007**: **API key exposure** - Accidental commit of API keys to source control. **Mitigation**: Use .gitignore for .env files, Azure Key Vault for production, security scanning in CI pipeline
 - **RISK-008**: **Breaking changes in weather APIs** - External APIs may change response format without notice. **Mitigation**: Comprehensive error handling, logging, monitoring, quick rollback capability
