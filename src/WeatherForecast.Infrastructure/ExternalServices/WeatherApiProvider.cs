@@ -21,6 +21,7 @@ public class WeatherApiProvider : IWeatherSourceProvider
     private readonly ILogger<WeatherApiProvider> _logger;
     private readonly WeatherSourceOptions _options;
     private readonly ResiliencePipeline _resiliencePipeline;
+    private readonly ICoordinatesProvider _coordinatesProvider;
 
     public const string SourceProviderName = "WeatherAPI";
     public string SourceName => SourceProviderName;
@@ -29,16 +30,19 @@ public class WeatherApiProvider : IWeatherSourceProvider
         IHttpClientFactory httpClientFactory,
         IOptionsMonitor<WeatherSourceOptions> options,
         [FromKeyedServices(SourceProviderName)] ResiliencePipeline resiliencePipeline,
+        ICoordinatesProvider coordinatesProvider,
         ILogger<WeatherApiProvider> logger)
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(resiliencePipeline);
+        ArgumentNullException.ThrowIfNull(coordinatesProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
         _httpClient = httpClientFactory.CreateClient(nameof(WeatherApiProvider));
         _options = options.Get(SourceProviderName);
         _resiliencePipeline = resiliencePipeline;
+        _coordinatesProvider = coordinatesProvider;
         _logger = logger;
 
         _httpClient.BaseAddress = new Uri(_options.BaseUrl);
@@ -58,7 +62,8 @@ public class WeatherApiProvider : IWeatherSourceProvider
             var daysDiff = (date.Date - DateTime.UtcNow.Date).Days;
             var endpoint = daysDiff <= 0 ? "history" : "forecast";
             
-            var query = $"{location.City},{location.Country}";
+            var (latitude, longitude) = await _coordinatesProvider.GetCoordinatesAsync(location, cancellationToken);
+            var query = $"{latitude},{longitude}";
             var url = $"/v1/{endpoint}.json?key={_options.ApiKey}&q={Uri.EscapeDataString(query)}&dt={date:yyyy-MM-dd}";
 
             var response = await _resiliencePipeline.ExecuteAsync(async ct => 

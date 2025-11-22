@@ -10,6 +10,8 @@ using WeatherForecast.Application.Common.Interfaces;
 using WeatherForecast.Infrastructure.Caching;
 using WeatherForecast.Infrastructure.Configuration;
 using WeatherForecast.Infrastructure.ExternalServices;
+using WeatherForecast.Infrastructure.ExternalServices.OpenWeatherMap;
+using WeatherForecast.Infrastructure.Extensions;
 
 namespace WeatherForecast.Infrastructure;
 
@@ -29,12 +31,48 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddHybridCache();
+        services.AddWeatherHttpClients(configuration);
+        
+        services.AddSingleton<ICoordinatesProvider, CoordinatesProvider>();
+        
+        // Register OpenWeatherMap nested providers as keyed services
+        RegisterNestedProvider<IOpenWeatherMapHistoricalProvider, OpenWeatherMapHistoricalProvider>(
+            services, "OpenWeatherMap.Historical", OpenWeatherMapProvider.SourceProviderName);
+        RegisterNestedProvider<IOpenWeatherMapForecastProvider, OpenWeatherMapForecastProvider>(
+            services, "OpenWeatherMap.Forecast", OpenWeatherMapProvider.SourceProviderName);
         
         RegisterSourceProvider<OpenMeteoProvider>(services, configuration, OpenMeteoProvider.SourceProviderName);
         RegisterSourceProvider<OpenWeatherMapProvider>(services, configuration, OpenWeatherMapProvider.SourceProviderName);
         RegisterSourceProvider<WeatherApiProvider>(services, configuration, WeatherApiProvider.SourceProviderName);
         
         return services;
+    }
+
+    private static void RegisterNestedProvider<TInterface, TImplementation>(
+        IServiceCollection services,
+        string httpClientName,
+        string sourceName)
+        where TInterface : class
+        where TImplementation : class, TInterface
+    {
+        services.AddKeyedSingleton<TInterface>(httpClientName, (serviceProvider, key) =>
+        {
+            var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient(httpClientName);
+            var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<WeatherSourceOptions>>();
+            var options = optionsMonitor.Get(sourceName);
+            var resiliencePipeline = serviceProvider.GetRequiredKeyedService<ResiliencePipeline>(sourceName);
+            var coordinatesProvider = serviceProvider.GetRequiredService<ICoordinatesProvider>();
+            var logger = serviceProvider.GetRequiredService<ILogger<TImplementation>>();
+            
+            return (TInterface)Activator.CreateInstance(
+                typeof(TImplementation),
+                httpClient,
+                options,
+                resiliencePipeline,
+                coordinatesProvider,
+                logger)!;
+        });
     }
 
     private static void RegisterSourceProvider<TSourceProvider>(
@@ -46,7 +84,6 @@ public static class DependencyInjection
         services.Configure<WeatherSourceOptions>(
             sourceName,
             configuration.GetSection($"WeatherSources:{sourceName}"));
-        services.AddHttpClient<TSourceProvider>();
         services.DecorateWithCache<TSourceProvider>();
         
         // Register keyed resilience pipeline factory

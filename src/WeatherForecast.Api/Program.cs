@@ -1,41 +1,96 @@
-
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Serilog;
+using Serilog.Formatting.Compact;
+using WeatherForecast.Api.Extensions;
+using WeatherForecast.Api.Middleware;
 using WeatherForecast.Application;
 using WeatherForecast.Infrastructure;
-using WeatherForecast.Application.Common.Interfaces;
-using WeatherForecast.Application.Common.Models;
-using WeatherForecast.Domain.ValueObjects;
+using WeatherForecast.Infrastructure.Configuration;
+using WeatherForecast.Infrastructure.ExternalServices;
 
-var builder = WebApplication.CreateBuilder(args);
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json")
+        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true)
+        .Build())
+    .Enrich.FromLogContext()
+    .Enrich.WithEnvironmentName()
+    .WriteTo.Console(new CompactJsonFormatter())
+    .CreateLogger();
 
-// Add services to the container
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    Log.Information("Starting Weather Forecast API");
 
-app.UseHttpsRedirection();
+    var builder = WebApplication.CreateBuilder(args);
 
-// Debug endpoint: aggregate weather for London, GB, today
-app.MapGet("/aggregate", async (IWeatherAggregationService aggregator) =>
-{
-    var request = new WeatherForecastRequest
+    builder.Host.UseSerilog();
+
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    
+    builder.Services.AddSwaggerGen(options =>
     {
-        City = "London",
-        Country = "GB",
-        Date = DateTime.Today
-    };
-    var result = await aggregator.GetAggregatedForecastAsync(request, CancellationToken.None);
-    return Results.Json(result);
-})
-.WithName("AggregateWeatherDebug")
-.WithOpenApi();
+        options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+        {
+            Title = "Weather Forecast Aggregation API",
+            Version = "v1",
+            Description = "Aggregates weather forecasts from multiple free API sources (OpenMeteo, WeatherAPI.com, OpenWeatherMap) with caching, resilience, and observability.",
+            Contact = new Microsoft.OpenApi.Models.OpenApiContact
+            {
+                Name = "Development Team"
+            }
+        });
 
-app.Run();
+        // Include XML comments
+        var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath))
+        {
+            options.IncludeXmlComments(xmlPath);
+        }
+    });
+
+    builder.Services.AddApplication();
+    builder.Services.AddInfrastructure(builder.Configuration);
+
+    builder.Services.AddOpenTelemetryObservability(builder.Configuration, builder.Environment);
+    
+    HealthChecksExtensions.ConfigureHealthChecks(builder);
+
+    var app = builder.Build();
+
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Weather Forecast API v1");
+            options.RoutePrefix = "swagger";
+        });
+    }
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.MapHealthCheckEndpoints();
+
+    Log.Information("Weather Forecast API started successfully");
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}
