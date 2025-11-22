@@ -15,11 +15,6 @@ public interface IWeatherSourceProvider
     string SourceName { get; }
 
     /// <summary>
-    /// Gets a value indicating whether this provider is enabled and should be queried.
-    /// </summary>
-    bool IsEnabled { get; }
-
-    /// <summary>
     /// Retrieves weather forecast data from the external source.
     /// </summary>
     /// <param name="location">The location for which to retrieve the forecast.</param>
