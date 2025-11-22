@@ -2,7 +2,8 @@
 phase: 5
 title: Infrastructure Layer - External API Providers
 goal: Implement weather source providers with HTTP clients, resilience policies, and error handling
-status: Planned
+status: Completed
+completed_date: 2025-11-22
 ---
 
 # Implementation Phase 5: Infrastructure Layer - External API Providers
@@ -13,7 +14,7 @@ status: Planned
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-041 | Install NuGet packages in Infrastructure: `Microsoft.Extensions.Http.Polly`, `StackExchange.Redis`, `Microsoft.Extensions.Caching.Memory`, `Polly` | | |
+| TASK-041 | Install NuGet packages in Infrastructure: `Microsoft.Extensions.Http.Polly`, `StackExchange.Redis`, `Microsoft.Extensions.Caching.Memory`, `Polly` | Yes | 2025-11-22 |
 | TASK-042 | Create `WeatherSourceOptions` in `src/WeatherForecast.Infrastructure/Configuration/WeatherSourceOptions.cs` with BaseUrl, ApiKey, TimeoutSeconds, CacheDurationMinutes properties | | |
 | TASK-043 | Create `OpenMeteoProvider` in `src/WeatherForecast.Infrastructure/ExternalServices/OpenMeteoProvider.cs` implementing `IWeatherSourceProvider` | | |
 | TASK-044 | Implement OpenMeteo API integration: endpoint `https://api.open-meteo.com/v1/forecast`, parameters: latitude, longitude (from geocoding), date, temperature_2m, relative_humidity_2m | | |
