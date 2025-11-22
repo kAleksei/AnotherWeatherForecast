@@ -2,6 +2,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System.Reflection;
+using OpenTelemetry.Logs;
 
 namespace AnotherWeatherForecast.Api.Extensions;
 
@@ -69,7 +70,7 @@ public static class OpenTelemetryExtensions
                 // Add OTLP exporter
                 tracing.AddOtlpExporter(options =>
                 {
-                    options.Endpoint = new Uri(otlpEndpoint);
+                    options.Endpoint = new Uri($"{otlpEndpoint}/traces");
                 });
             })
             .WithMetrics(metrics =>
@@ -87,7 +88,14 @@ public static class OpenTelemetryExtensions
                 // Add OTLP exporter
                 metrics.AddOtlpExporter(options =>
                 {
-                    options.Endpoint = new Uri(otlpEndpoint);
+                    options.Endpoint = new Uri($"{otlpEndpoint}/metrics");
+                });
+            })
+            .WithLogging(logging =>
+            {
+                logging.AddOtlpExporter(options =>
+                {
+                    options.Endpoint = new Uri($"{otlpEndpoint}/logs");
                 });
             });
 
