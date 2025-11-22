@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WeatherForecast.Application.Common.Models;
 using WeatherForecast.Domain.Entities;
