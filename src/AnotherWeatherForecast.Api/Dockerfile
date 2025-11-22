@@ -9,17 +9,13 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Directory.Packages.props", "./Directory.Packages.props"]
 COPY ["Directory.Build.props", "./Directory.Build.props"]
-COPY ["src/AnotherWeatherForecast.Api/AnotherWeatherForecast.Api.csproj", "AnotherWeatherForecast.Api/"]
-COPY ["src/AnotherWeatherForecast.Application/AnotherWeatherForecast.Application.csproj", "AnotherWeatherForecast.Application/"]
-COPY ["src/AnotherWeatherForecast.Domain/AnotherWeatherForecast.Domain.csproj", "AnotherWeatherForecast.Domain/"]
-COPY ["src/AnotherWeatherForecast.Infrastructure/AnotherWeatherForecast.Infrastructure.csproj", "AnotherWeatherForecast.Infrastructure/"]
-
-RUN dotnet restore "AnotherWeatherForecast.Api/AnotherWeatherForecast.Api.csproj"
 
 COPY ["src/AnotherWeatherForecast.Api/", "AnotherWeatherForecast.Api/"]
 COPY ["src/AnotherWeatherForecast.Application/", "AnotherWeatherForecast.Application/"]
 COPY ["src/AnotherWeatherForecast.Domain/", "AnotherWeatherForecast.Domain/"]
 COPY ["src/AnotherWeatherForecast.Infrastructure/", "AnotherWeatherForecast.Infrastructure/"]
+
+RUN dotnet restore "AnotherWeatherForecast.Api/AnotherWeatherForecast.Api.csproj"
 
 WORKDIR "/src/AnotherWeatherForecast.Api"
 RUN dotnet build "./AnotherWeatherForecast.Api.csproj" -c $BUILD_CONFIGURATION --no-restore
