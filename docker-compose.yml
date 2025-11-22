@@ -2,25 +2,14 @@ version: '3.8'
 services:
   api:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./src
+      dockerfile: AnotherWeatherForecast.Api/Dockerfile
     ports:
       - "5000:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__Redis: "redis:6379"
       WeatherSources__OpenMeteo__Enabled: "true"
       WeatherSources__WeatherApi__Enabled: "true"
       WeatherSources__OpenWeatherMap__Enabled: "true"
       WeatherSources__WeatherApi__ApiKey: "${WEATHERAPI_KEY}"
       WeatherSources__OpenWeatherMap__ApiKey: "${OPENWEATHERMAP_KEY}"
-    depends_on:
-      - redis
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-volumes:
-  redis-data:
