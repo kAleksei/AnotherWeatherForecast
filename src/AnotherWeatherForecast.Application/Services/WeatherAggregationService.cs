@@ -33,6 +33,13 @@ public class WeatherAggregationService : IWeatherAggregationService
             request.City, request.Country, request.Date.ToString("yyyy-MM-dd"));
 
         var providersToQuery = FilterProviders(request.Sources);
+        if (!providersToQuery.Any())
+        {
+            _logger.LogInformation("No matching weather source providers found for the requested sources. Sources: {Sources}",
+                request.Sources != null ? string.Join(", ", request.Sources) : null);
+            
+        }
+        
         var location = new Location(request.City, request.Country);
 
         var forecastTasks = providersToQuery.Select(async provider =>

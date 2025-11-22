@@ -19,7 +19,7 @@ The solution follows **Clean Architecture** with four distinct layers:
 
 - .NET 8.0 SDK or higher
 - Docker Desktop (for containerized development)
-- Redis (optional, can run with memory-only cache)
+This service relies on the in-memory cache provided by `IMemoryCache` and does not depend on Redis.
 
 ## Build and Test
 
@@ -50,8 +50,17 @@ dotnet test AnotherWeatherForecast.slnx --logger "console;verbosity=detailed"
 cd src/WeatherForecast.Api
 dotnet run
 
-# Run with Docker Compose (includes Redis)
+# Run with Docker Compose
 docker-compose up
+```
+
+## Postman Collection & Tests
+
+Use the included Postman collection and environment templates to run end-to-end checks.
+
+```bash
+newman run postman/WeatherForecast.postman_collection.json \
+	-e postman/WeatherForecast-Dev.postman_environment.json
 ```
 
 ## Continuous Integration
@@ -111,8 +120,6 @@ This helps catch issues early and speeds up the code review process.
 For detailed architectural guidelines and development practices, see:
 
 - [GitHub Copilot Instructions](/.github/copilot-instructions.md) - Development guidelines and conventions
-- [Implementation Plan](/plan/phases/) - Detailed implementation phases and tasks
-- [Phase 13: CI/CD Pipeline](/plan/phases/phase-13-cicd.md) - CI/CD implementation details
 
 ## License
 

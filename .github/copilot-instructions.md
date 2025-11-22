@@ -29,7 +29,7 @@ The solution follows **Clean Architecture** with four distinct layers:
 
 - .NET 8.0 SDK or higher
 - Docker Desktop (for containerized development)
-- Redis (optional, can run with memory-only cache)
+- The service relies on `IMemoryCache`; no external cache like Redis is required
 
 ### Build
 
@@ -70,7 +70,7 @@ dotnet run
 # Run with specific environment
 dotnet run --environment Development
 
-# Run with Docker Compose (includes Redis)
+# Run with Docker Compose
 docker-compose up
 ```
 
@@ -365,7 +365,7 @@ public async Task GetForecastAsync_WithValidLocation_ReturnsSuccessfulForecast()
 
 ### OpenTelemetry
 
-- Instrumentation for ASP.NET Core, HttpClient, Redis
+- Instrumentation for ASP.NET Core and HttpClient
 - Export to Azure Application Insights (production) or Console (development)
 - Custom metrics: cache hit ratio, source availability, response time
 
