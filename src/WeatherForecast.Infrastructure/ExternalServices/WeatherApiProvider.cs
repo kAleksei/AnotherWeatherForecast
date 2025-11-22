@@ -37,7 +37,7 @@ public class WeatherApiProvider : IWeatherSourceProvider
         ArgumentNullException.ThrowIfNull(logger);
 
         _httpClient = httpClientFactory.CreateClient(nameof(WeatherApiProvider));
-        _options = options.Get("WeatherAPI");
+        _options = options.Get(SourceProviderName);
         _resiliencePipeline = resiliencePipeline;
         _logger = logger;
 
