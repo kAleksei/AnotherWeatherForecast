@@ -39,7 +39,7 @@ Create a comprehensive Mermaid diagram that illustrates the complete system arch
 - **User Layer**: Show how different user types (web browsers, mobile apps, admin interfaces) interact with the system
 - **Application Layer**: Depict load balancers, application instances, and authentication services (Stack Auth)
 - **Service Layer**: Include tRPC APIs, background services, workflow engines (n8n), and any epic-specific services
-- **Data Layer**: Show databases (PostgreSQL), vector databases (Qdrant), caching layers (Redis), and external API integrations
+- **Data Layer**: Show databases (PostgreSQL), vector databases (Qdrant), caching layers (in-memory), and external API integrations
 - **Infrastructure Layer**: Represent Docker containerization and deployment architecture
 
 Use clear subgraphs to organize these layers, apply consistent color coding for different component types, and show the data flow between components. Include both synchronous request paths and asynchronous processing flows where relevant to the epic.

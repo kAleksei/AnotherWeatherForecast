@@ -53,7 +53,7 @@ public class WeatherController : ControllerBase
         [FromQuery] DateTime date,
         [FromQuery] string city,
         [FromQuery] string country,
-        [FromQuery] List<string>? sources = null,
+        [FromQuery] string sources = null,
         CancellationToken cancellationToken = default)
     {
         var request = new WeatherForecastRequest
@@ -61,10 +61,11 @@ public class WeatherController : ControllerBase
             Date = date,
             City = city,
             Country = country,
-            Sources = sources
+            Sources = string.IsNullOrWhiteSpace(sources)
+                ? null
+                : sources.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
         };
 
-        // Validate request
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
@@ -82,10 +83,22 @@ public class WeatherController : ControllerBase
             });
         }
 
-        // Call aggregation service
         var response = await _aggregationService.GetAggregatedForecastAsync(request, cancellationToken);
 
-        // Check if all sources are unavailable
+        if(response.Sources.Count == 0)
+        {
+            _logger.LogError("No weather sources found for {City}, {Country}. Sources: {Sources}", city, country, sources != null ? string.Join(", ", sources) : "All");
+
+            return StatusCode(
+                StatusCodes.Status400BadRequest,
+                new ProblemDetails
+                {
+                    Title = "Invalid sources",
+                    Detail = "No matching weather source providers found for the requested sources.",
+                    Status = StatusCodes.Status400BadRequest,
+                    Instance = HttpContext.Request.Path
+                });
+        }
         if (response.Sources.All(s => !s.Available))
         {
             _logger.LogError("All weather sources unavailable for {City}, {Country}", city, country);

@@ -1,0 +1,297 @@
+{
+  "info": {
+    "name": "AnotherWeatherForecast API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "_postman_id": "8d2d9d1f-37c6-4bba-bab9-3b5b6cb8cf6e"
+  },
+  "item": [
+    {
+      "name": "Weather Forecast",
+      "item": [
+        {
+          "name": "GET Aggregated Forecast",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date={{date}}&city={{city}}&country={{country}}&sources"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Response shape matches expectations', function () {",
+                  "    pm.expect(json).to.have.property('location');",
+                  "    pm.expect(json).to.have.property('date');",
+                  "    pm.expect(json).to.have.property('aggregatedForecast').that.is.an('object');",
+                  "    pm.expect(json).to.have.property('sources').that.is.an('array');",
+                  "    pm.expect(json).to.have.property('metadata');",
+                  "});",
+                  "pm.test('Aggregated forecast contains numeric average temperature', function () {",
+                  "    pm.expect(json.aggregatedForecast).to.have.property('averageTemperatureCelsius').that.is.a('number');",
+                  "});",
+                  "pm.test('At least three sources returned', function () {",
+                  "    pm.expect(json.sources.length).to.be.at.least(3);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Filtered by Source",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date={{date}}&city={{city}}&country={{country}}&sources=OpenMeteo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Only OpenMeteo returned', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.sources.length).to.eql(1);",
+                  "    pm.expect(json.sources[0].name).to.eql('OpenMeteo');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Multiple Sources",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date={{date}}&city={{city}}&country={{country}}&sources=OpenMeteo,WeatherAPI"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Two sources returned', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.sources.length).to.eql(2);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Future Date",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date={{date}}&city={{city}}&country={{country}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const future = new Date();",
+                  "future.setDate(future.getDate() + 3);",
+                  "pm.environment.set('date', future.toISOString().split('T')[0]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Future date returns 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Historical Date",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date={{date}}&city={{city}}&country={{country}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const historical = new Date();",
+                  "historical.setDate(historical.getDate() - 3);",
+                  "pm.environment.set('date', historical.toISOString().split('T')[0]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Historical date returns 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Invalid Date",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date={{date}}&city={{city}}&country={{country}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const invalid = new Date();",
+                  "invalid.setDate(invalid.getDate() + 10);",
+                  "pm.environment.set('date', invalid.toISOString().split('T')[0]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Invalid date returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Error message mentions 7 days', function () {",
+                  "    pm.expect(json.message || '').to.include('7 days');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cache Behavior",
+      "item": [
+        {
+          "name": "GET First Request",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date={{date}}&city={{city}}&country={{country}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Cache miss on first request', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.metadata).to.have.property('cacheHit').that.is.false;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Error Scenarios",
+      "item": [
+        {
+          "name": "GET Missing Required Parameters",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date={{date}}&country={{country}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Missing city returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Errors object mentions city', function () {",
+                  "    const keys = Object.keys(json.errors || {});",
+                  "    pm.expect(keys).to.include('city');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Invalid Country Code",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date={{date}}&city={{city}}&country=INVALID"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Invalid country returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Malformed Date Format",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/weather/forecast?date=2025/11/20&city={{city}}&country={{country}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Malformed date returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "date",
+      "value": "{{isoTimestamp}}"
+    },
+    {
+      "key": "city",
+      "value": "London"
+    },
+    {
+      "key": "country",
+      "value": "GB"
+    }
+  ]
+}
