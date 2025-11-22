@@ -2,6 +2,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System.Reflection;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 
 namespace AnotherWeatherForecast.Api.Extensions;
@@ -54,14 +55,12 @@ public static class OpenTelemetryExtensions
             .WithTracing(tracing =>
             {
                 tracing
-                    .AddAspNetCoreInstrumentation(options =>
-                    {
-                        options.RecordException = true;
-                    })
-                    .AddHttpClientInstrumentation(options =>
-                    {
-                        options.RecordException = true;
-                    });
+                    .AddAspNetCoreInstrumentation(options => { options.RecordException = true; })
+                    .AddHttpClientInstrumentation(options => { options.RecordException = true; })
+                    .SetErrorStatusOnException()
+                    .AddSource(
+                        "Microsoft.AspNetCore.*",
+                        "AnotherWeatherForecast.*");
 
                 // Add console exporter in development
                 if (environment.IsDevelopment())
@@ -74,13 +73,17 @@ public static class OpenTelemetryExtensions
                 {
                     options.Endpoint = new Uri($"{otlpEndpoint}/traces");
                     options.Headers = headers;
+                    options.Protocol = OtlpExportProtocol.HttpProtobuf;
                 });
             })
             .WithMetrics(metrics =>
             {
                 metrics
                     .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .AddMeter(
+                        "Microsoft.AspNetCore.*",
+                        "AnotherWeatherForecast.*");
 
                 // Add console exporter in development
                 if (environment.IsDevelopment())
@@ -93,6 +96,7 @@ public static class OpenTelemetryExtensions
                 {
                     options.Endpoint = new Uri($"{otlpEndpoint}/metrics");
                     options.Headers = headers;
+                    options.Protocol = OtlpExportProtocol.HttpProtobuf;
                 });
             })
             .WithLogging(logging =>
@@ -101,6 +105,7 @@ public static class OpenTelemetryExtensions
                 {
                     options.Endpoint = new Uri($"{otlpEndpoint}/logs");
                     options.Headers = headers;
+                    options.Protocol = OtlpExportProtocol.HttpProtobuf;
                 });
             });
 
