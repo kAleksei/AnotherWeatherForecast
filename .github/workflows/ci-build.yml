@@ -24,10 +24,13 @@ jobs:
           dotnet-version: '8.0.x'
       
       - name: Restore dependencies
-        run: dotnet restore src/WeatherForecast.sln
+        run: dotnet restore AnotherWeatherForecast.slnx
       
       - name: Build solution
-        run: dotnet build src/WeatherForecast.sln --configuration Release --no-restore
+        run: dotnet build AnotherWeatherForecast.slnx --configuration Release --no-restore
       
       - name: Run tests
-        run: dotnet test src/WeatherForecast.sln --configuration Release --no-build --verbosity normal
+        run: dotnet test AnotherWeatherForecast.slnx --configuration Release --no-build --verbosity normal
+      
+      - name: Build Docker image
+        run: docker build -f src/AnotherWeatherForecast.Api/Dockerfile -t anotherweatherforecast:${{ github.sha }} -t anotherweatherforecast:latest .

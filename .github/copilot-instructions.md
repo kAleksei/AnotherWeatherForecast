@@ -35,29 +35,29 @@ The solution follows **Clean Architecture** with four distinct layers:
 
 ```bash
 # Build entire solution
-dotnet build src/WeatherForecast.sln
+dotnet build AnotherWeatherForecast.slnx
 
 # Build specific project
-dotnet build src/WeatherForecast.Api/WeatherForecast.Api.csproj
+dotnet build src/AnotherWeatherForecast.Api/AnotherWeatherForecast.Api.csproj
 
 # Build in Release mode
-dotnet build src/WeatherForecast.sln --configuration Release
+dotnet build AnotherWeatherForecast.slnx --configuration Release
 ```
 
 ### Test
 
 ```bash
 # Run all tests
-dotnet test src/WeatherForecast.sln
+dotnet test AnotherWeatherForecast.slnx
 
 # Run tests with detailed output
-dotnet test src/WeatherForecast.sln --logger "console;verbosity=detailed"
+dotnet test AnotherWeatherForecast.slnx --logger "console;verbosity=detailed"
 
 # Run tests with coverage
-dotnet test src/WeatherForecast.sln --collect:"XPlat Code Coverage"
+dotnet test AnotherWeatherForecast.slnx --collect:"XPlat Code Coverage"
 
 # Run specific test project
-dotnet test tests/WeatherForecast.Domain.Tests/WeatherForecast.Domain.Tests.csproj
+dotnet test tests/AnotherWeatherForecast.Domain.Tests/AnotherWeatherForecast.Domain.Tests.csproj
 ```
 
 ### Run Locally
@@ -78,14 +78,14 @@ docker-compose up
 
 ```bash
 # Restore NuGet packages for solution
-dotnet restore src/WeatherForecast.sln
+dotnet restore AnotherWeatherForecast.slnx
 ```
 
 ### Clean
 
 ```bash
 # Clean build artifacts
-dotnet clean src/WeatherForecast.sln
+dotnet clean AnotherWeatherForecast.slnx
 ```
 
 ## Development Workflow
@@ -100,8 +100,8 @@ dotnet clean src/WeatherForecast.sln
 ### Before Committing
 
 Always ensure:
-1. Code builds successfully: `dotnet build src/WeatherForecast.sln`
-2. All tests pass: `dotnet test src/WeatherForecast.sln`
+1. Code builds successfully: `dotnet build AnotherWeatherForecast.slnx`
+2. All tests pass: `dotnet test AnotherWeatherForecast.slnx`
 3. Code follows existing conventions (see below)
 
 ### Testing Strategy

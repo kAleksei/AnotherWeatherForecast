@@ -27,20 +27,20 @@ The solution follows **Clean Architecture** with four distinct layers:
 
 ```bash
 # Restore dependencies
-dotnet restore src/WeatherForecast.sln
+dotnet restore AnotherWeatherForecast.slnx
 
 # Build in Release configuration
-dotnet build src/WeatherForecast.sln --configuration Release
+dotnet build AnotherWeatherForecast.slnx --configuration Release
 ```
 
 ### Run Tests
 
 ```bash
 # Run all tests
-dotnet test src/WeatherForecast.sln
+dotnet test AnotherWeatherForecast.slnx
 
 # Run tests with detailed output
-dotnet test src/WeatherForecast.sln --logger "console;verbosity=detailed"
+dotnet test AnotherWeatherForecast.slnx --logger "console;verbosity=detailed"
 ```
 
 ### Run Locally
@@ -91,8 +91,8 @@ Before pushing your changes, ensure your code builds and tests pass locally:
 
 ```bash
 # Quick validation
-dotnet build src/WeatherForecast.sln --configuration Release
-dotnet test src/WeatherForecast.sln --configuration Release --no-build
+dotnet build AnotherWeatherForecast.slnx --configuration Release
+dotnet test AnotherWeatherForecast.slnx --configuration Release --no-build
 ```
 
 This helps catch issues early and speeds up the code review process.
