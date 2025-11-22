@@ -6,6 +6,10 @@ services:
       dockerfile: src/AnotherWeatherForecast.Api/Dockerfile
     ports:
       - "5000:8080"
+    # add restart policy to ensure the container restarts on failure for docker swarm
+    deploy:
+      restart_policy:
+        condition: on-failure
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       WeatherSources__OpenMeteo__Enabled: "true"
