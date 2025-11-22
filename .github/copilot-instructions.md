@@ -38,7 +38,7 @@ The solution follows **Clean Architecture** with four distinct layers:
 dotnet build AnotherWeatherForecast.slnx
 
 # Build specific project
-dotnet build src/WeatherForecast.Api/WeatherForecast.Api.csproj
+dotnet build src/AnotherWeatherForecast.Api/AnotherWeatherForecast.Api.csproj
 
 # Build in Release mode
 dotnet build AnotherWeatherForecast.slnx --configuration Release
