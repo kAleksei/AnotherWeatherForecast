@@ -57,7 +57,7 @@ dotnet test AnotherWeatherForecast.slnx --logger "console;verbosity=detailed"
 dotnet test AnotherWeatherForecast.slnx --collect:"XPlat Code Coverage"
 
 # Run specific test project
-dotnet test tests/WeatherForecast.Domain.Tests/WeatherForecast.Domain.Tests.csproj
+dotnet test tests/AnotherWeatherForecast.Domain.Tests/AnotherWeatherForecast.Domain.Tests.csproj
 ```
 
 ### Run Locally
