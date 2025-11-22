@@ -99,7 +99,8 @@ public class OpenMeteoProvider : IWeatherSourceProvider
     {
         var url = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(location.City)}&count=1&language=en&format=json";
         
-        var response = await _httpClient.GetAsync(url, cancellationToken);
+        var response = await _resiliencePipeline.ExecuteAsync(async ct => 
+            await _httpClient.GetAsync(url, ct), cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
