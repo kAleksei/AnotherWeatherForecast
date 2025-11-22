@@ -92,7 +92,7 @@ public class WeatherAggregationService : IWeatherAggregationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching forecast from {SourceName}", provider.SourceName);
+            _logger.LogError("Error fetching forecast from {SourceName}. Exception: {Error}", provider.SourceName, ex.Message);
             
             return new ForecastSource(
                 provider.SourceName,
