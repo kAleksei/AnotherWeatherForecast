@@ -43,6 +43,8 @@ public static class OpenTelemetryExtensions
             serviceVersion = version;
         }
 
+        var headers = configuration.GetValue<string>("OpenTelemetry:OtlpHeaders") ?? string.Empty;
+
         services.AddOpenTelemetry()
             .ConfigureResource(resource => resource
                 .AddService(
@@ -71,6 +73,7 @@ public static class OpenTelemetryExtensions
                 tracing.AddOtlpExporter(options =>
                 {
                     options.Endpoint = new Uri($"{otlpEndpoint}/traces");
+                    options.Headers = headers;
                 });
             })
             .WithMetrics(metrics =>
@@ -89,6 +92,7 @@ public static class OpenTelemetryExtensions
                 metrics.AddOtlpExporter(options =>
                 {
                     options.Endpoint = new Uri($"{otlpEndpoint}/metrics");
+                    options.Headers = headers;
                 });
             })
             .WithLogging(logging =>
@@ -96,6 +100,7 @@ public static class OpenTelemetryExtensions
                 logging.AddOtlpExporter(options =>
                 {
                     options.Endpoint = new Uri($"{otlpEndpoint}/logs");
+                    options.Headers = headers;
                 });
             });
 

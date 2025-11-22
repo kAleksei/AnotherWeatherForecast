@@ -14,3 +14,4 @@ services:
       WeatherSources__WeatherApi__ApiKey: "${WEATHERAPI_KEY}"
       WeatherSources__OpenWeatherMap__ApiKey: "${OPENWEATHERMAP_KEY}"
       OpenTelemetry__OtlpEndpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+      OpenTelemetry__OtlpHeaders: "${OTEL_EXPORTER_OTLP_HEADERS}"
