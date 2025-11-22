@@ -2,8 +2,8 @@ version: '3.8'
 services:
   api:
     build:
-      context: ./src
-      dockerfile: AnotherWeatherForecast.Api/Dockerfile
+      context: .
+      dockerfile: src/AnotherWeatherForecast.Api/Dockerfile
     ports:
       - "5000:8080"
     environment:
