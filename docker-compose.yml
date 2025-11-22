@@ -7,7 +7,7 @@ services:
     ports:
       - "5000:8080"
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Production
       WeatherSources__OpenMeteo__Enabled: "true"
       WeatherSources__WeatherApi__Enabled: "true"
       WeatherSources__OpenWeatherMap__Enabled: "true"
