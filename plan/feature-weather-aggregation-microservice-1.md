@@ -145,10 +145,9 @@ This implementation plan defines the complete development, testing, and deployme
 - **GUD-002**: Use Conventional Commits format for all commit messages
 - **GUD-003**: Create Architecture Decision Records (ADRs) for key decisions
 - **GUD-004**: Optimize for readability over cleverness (Clean Code principles)
-- **GUD-005**: Document all assumptions explicitly in code comments and ADRs
-- **GUD-006**: Prefer composition over inheritance
-- **GUD-007**: Keep methods small and single-purpose (SRP)
-- **GUD-008**: Use meaningful variable and method names (no abbreviations)
+- **GUD-005**: Prefer composition over inheritance
+- **GUD-006**: Keep methods small and single-purpose (SRP)
+- **GUD-007**: Use meaningful variable and method names (no abbreviations)
 
 ### Patterns to Follow
 
@@ -197,7 +196,7 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-019 | Create `ForecastSource` entity in `src/WeatherForecast.Domain/Entities/ForecastSource.cs` with properties: Name, SourceType, Temperature, Humidity, Available, Error, RetrievedAt | | |
 | TASK-020 | Create `WeatherForecast` aggregate root in `src/WeatherForecast.Domain/Entities/WeatherForecast.cs` with Location, Date, Sources (List<ForecastSource>), methods: AddSource, CalculateAverage | | |
 | TASK-021 | Create `IWeatherRepository` interface in `src/WeatherForecast.Domain/Interfaces/IWeatherRepository.cs` with method: `Task<WeatherForecast?> GetForecastAsync(Location, DateTime, CancellationToken)` | | |
-| TASK-022 | Create `ICacheRepository` interface in `src/WeatherForecast.Domain/Interfaces/ICacheRepository.cs` with methods: `Task<T?> GetAsync<T>`, `Task SetAsync<T>`, `Task RemoveAsync` | | |
+| TASK-022 | Create `CachedWeatherSourceProvider` decorator in `src/WeatherForecast.Infrastructure/Caching/CachedWeatherSourceProvider.cs` to wrap providers with HybridCache functionality | | |
 
 ### Implementation Phase 3: Application Layer - DTOs, Interfaces, and Validation
 
@@ -210,7 +209,7 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-025 | Create `AggregatedForecastDto` DTO in `src/WeatherForecast.Application/Common/Models/AggregatedForecastDto.cs` with AverageTemperature, AverageHumidity, TemperatureRange | | |
 | TASK-026 | Create `WeatherForecastResponse` DTO in `src/WeatherForecast.Application/Common/Models/WeatherForecastResponse.cs` with Location, Date, AggregatedForecast, Sources, Metadata | | |
 | TASK-027 | Create `ResponseMetadata` DTO in `src/WeatherForecast.Application/Common/Models/ResponseMetadata.cs` with TotalSources, AvailableSources, CacheHit, ResponseTimeMs | | |
-| TASK-028 | Create `IWeatherSourceProvider` interface in `src/WeatherForecast.Application/Common/Interfaces/IWeatherSourceProvider.cs` with methods: `Task<ForecastSource> GetForecastAsync`, `WeatherSourceType SourceType`, `bool IsEnabled` | | |
+| TASK-028 | Create `IWeatherSourceProvider` interface in `src/WeatherForecast.Application/Common/Interfaces/IWeatherSourceProvider.cs` with methods: `Task<ForecastSource> GetForecastAsync`, `WeatherSourceType SourceType` | | |
 | TASK-029 | Create `IWeatherAggregationService` interface in `src/WeatherForecast.Application/Common/Interfaces/IWeatherAggregationService.cs` with method: `Task<WeatherForecastResponse> GetAggregatedForecastAsync` | | |
 | TASK-030 | Create `WeatherForecastRequestValidator` in `src/WeatherForecast.Application/Validators/WeatherForecastRequestValidator.cs` using FluentValidation: validate date range (±7 days), required fields, country code format | | |
 | TASK-031 | Install NuGet packages in Application project: `FluentValidation`, `FluentValidation.DependencyInjectionExtensions`, `AutoMapper`, `MediatR` | | |
@@ -238,7 +237,7 @@ This implementation plan defines the complete development, testing, and deployme
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
 | TASK-041 | Install NuGet packages in Infrastructure: `Microsoft.Extensions.Http.Polly`, `StackExchange.Redis`, `Microsoft.Extensions.Caching.Memory`, `Polly` | | |
-| TASK-042 | Create `WeatherSourceOptions` in `src/WeatherForecast.Infrastructure/Configuration/WeatherSourceOptions.cs` with BaseUrl, ApiKey, Enabled, TimeoutSeconds properties | | |
+| TASK-042 | Create `WeatherSourceOptions` in `src/WeatherForecast.Infrastructure/Configuration/WeatherSourceOptions.cs` with BaseUrl, ApiKey, TimeoutSeconds, CacheDurationMinutes properties | | |
 | TASK-043 | Create `OpenMeteoProvider` in `src/WeatherForecast.Infrastructure/ExternalServices/OpenMeteoProvider.cs` implementing `IWeatherSourceProvider` | | |
 | TASK-044 | Implement OpenMeteo API integration: endpoint `https://api.open-meteo.com/v1/forecast`, parameters: latitude, longitude (from geocoding), date, temperature_2m, relative_humidity_2m | | |
 | TASK-045 | Create `WeatherApiProvider` in `src/WeatherForecast.Infrastructure/ExternalServices/WeatherApiProvider.cs` implementing `IWeatherSourceProvider` | | |
@@ -249,20 +248,32 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-050 | Implement error handling in each provider: catch HttpRequestException, TimeoutException, map to ForecastSource with Available=false and Error message | | |
 | TASK-051 | Add structured logging in each provider: log request start, success, failure with correlation IDs | | |
 
-### Implementation Phase 6: Infrastructure Layer - Caching and Health Checks
+### Implementation Phase 6: Infrastructure Layer - Caching with Decorator Pattern
 
-**GOAL-006**: Implement two-level caching (memory + Redis) and comprehensive health checks with degradation support
+**GOAL-006**: Implement caching at provider level using CachedWeatherSourceProvider decorator with HybridCache
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-052 | Create `CacheOptions` in `src/WeatherForecast.Infrastructure/Configuration/CacheOptions.cs` with MemoryCacheDuration, RedisCacheDuration, EnableDistributedCache, SlidingExpiration properties | | |
-| TASK-053 | Create `HybridCacheService` in `src/WeatherForecast.Infrastructure/Caching/HybridCacheService.cs` implementing `ICacheRepository` | | |
-| TASK-054 | Implement L1 (memory) cache in `HybridCacheService`: use `IMemoryCache`, check memory first, TTL from config | | |
-| TASK-055 | Implement L2 (Redis) cache in `HybridCacheService`: use `IConnectionMultiplexer`, fallback to memory if Redis unavailable, TTL from config | | |
-| TASK-056 | Implement sliding expiration for Redis cache when `SlidingExpiration=true` in configuration | | |
-| TASK-057 | Implement `GetAsync<T>`: check L1 → if miss check L2 → if hit, populate L1 → return value | | |
-| TASK-058 | Implement `SetAsync<T>`: write to both L1 and L2 (if enabled), serialize to JSON for Redis | | |
+| TASK-052 | Add `Microsoft.Extensions.Caching.Hybrid` NuGet package to Infrastructure project | | |
+| TASK-053 | Create `CachedWeatherSourceProvider` decorator in `src/WeatherForecast.Infrastructure/Caching/CachedWeatherSourceProvider.cs` implementing `IWeatherSourceProvider` | | |
+| TASK-054 | Implement caching logic using HybridCache with per-provider TTL from `WeatherSourceOptions.CacheDurationMinutes` | | |
+| TASK-055 | Generate cache keys with format: `weather:{SourceName}:{City}:{Country}:{yyyyMMdd}` | | |
+| TASK-056 | Register HybridCache in DependencyInjection: `services.AddHybridCache()` | | |
+| TASK-057 | Wrap each weather provider with `CachedWeatherSourceProvider` in DI registration | | |
+| TASK-058 | Remove `ICacheRepository` dependency from `WeatherAggregationService` | | |
+### Implementation Phase 7: Infrastructure Layer - Health Checks
+
+**GOAL-007**: Implement comprehensive health checks with degradation support
+
+| Task | Description | Completed | Date |
+|------|-------------|-----------|------|
 | TASK-059 | Create `WeatherSourceHealthCheck` in `src/WeatherForecast.Infrastructure/ExternalServices/WeatherSourceHealthCheck.cs` implementing `IHealthCheck` | | |
+| TASK-060 | Implement parallel health checks for all weather sources: test HTTP connectivity, API validity | | |
+| TASK-061 | Implement health check logic: Healthy (all sources OK), Degraded (1+ sources down), Unhealthy (all sources down) | | |
+| TASK-062 | Create `DependencyInjection.cs` in `src/WeatherForecast.Infrastructure/DependencyInjection.cs` (if not exists) to register health checks | | |
+| TASK-063 | Register weather providers as singletons with caching decorators in `DependencyInjection.cs` | | |
+| TASK-064 | Register HybridCache: `services.AddHybridCache()` | | |
+| TASK-065 | Register health checks: `services.AddHealthChecks().AddCheck<WeatherSourceHealthCheck>()` | | |
 | TASK-060 | Implement parallel health checks for all weather sources: test HTTP connectivity, API key validity | | |
 | TASK-061 | Implement health check logic: Healthy (all sources OK), Degraded (1+ sources down), Unhealthy (all sources down) | | |
 | TASK-062 | Create `RedisHealthCheck` in `src/WeatherForecast.Infrastructure/Caching/RedisHealthCheck.cs`: ping Redis, return Healthy/Unhealthy | | |
@@ -311,7 +322,7 @@ This implementation plan defines the complete development, testing, and deployme
 | TASK-091 | Configure middleware pipeline: (1) ExceptionHandling (2) RequestLogging (3) Swagger (dev only) (4) HTTPS redirection (5) MapControllers (6) Health checks | | |
 | TASK-092 | Run app: `app.Run();` | | |
 | TASK-093 | Create `appsettings.json` in `src/WeatherForecast.Api/appsettings.json` with sections: Logging, WeatherSources, CacheSettings, ConnectionStrings, HealthCheckSettings | | |
-| TASK-094 | Configure WeatherSources section: OpenMeteo (BaseUrl, Enabled, TimeoutSeconds), WeatherAPI (BaseUrl, ApiKey, Enabled, TimeoutSeconds), OpenWeatherMap (BaseUrl, ApiKey, Enabled, TimeoutSeconds) | | |
+| TASK-094 | Configure WeatherSources section: OpenMeteo (BaseUrl, TimeoutSeconds), WeatherAPI (BaseUrl, ApiKey, TimeoutSeconds), OpenWeatherMap (BaseUrl, ApiKey, TimeoutSeconds) | | |
 | TASK-095 | Configure CacheSettings section: MemoryCacheDurationMinutes=15, RedisCacheDurationMinutes=60, EnableDistributedCache=true, SlidingExpiration=true | | |
 | TASK-096 | Configure ConnectionStrings section: Redis="localhost:6379" | | |
 | TASK-097 | Configure Serilog section: MinimumLevel (Default=Information), WriteTo (Console with CompactJsonFormatter), Enrich (FromLogContext, WithMachineName) | | |
