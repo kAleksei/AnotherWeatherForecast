@@ -33,4 +33,4 @@ jobs:
         run: dotnet test AnotherWeatherForecast.slnx --configuration Release --no-build --verbosity normal
       
       - name: Build Docker image
-        run: docker build -f src/AnotherWeatherForecast.Api/Dockerfile -t anotherweatherforecast:${{ github.sha }} -t anotherweatherforecast:latest ./src
+        run: docker build -f src/AnotherWeatherForecast.Api/Dockerfile -t anotherweatherforecast:${{ github.sha }} -t anotherweatherforecast:latest .
