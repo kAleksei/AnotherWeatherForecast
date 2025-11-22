@@ -35,8 +35,8 @@ public class WeatherAggregationService : IWeatherAggregationService
         var providersToQuery = FilterProviders(request.Sources);
         var location = new Location(request.City, request.Country);
 
-        var forecastTasks = providersToQuery.Select(provider =>
-            FetchFromProviderAsync(provider, location, request.Date, cancellationToken));
+        var forecastTasks = providersToQuery.Select(async provider =>
+            await FetchFromProviderAsync(provider, location, request.Date, cancellationToken));
 
         var forecastSources = await Task.WhenAll(forecastTasks);
         var aggregatedForecast = CalculateAggregatedForecast(forecastSources);

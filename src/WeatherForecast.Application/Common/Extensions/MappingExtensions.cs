@@ -27,7 +27,6 @@ public static class MappingExtensions
                 { 
                     Title = "Source Unavailable", 
                     Detail = source.Error,
-                    Status = 503
                 } 
                 : null,
             RetrievedAt = source.RetrievedAt

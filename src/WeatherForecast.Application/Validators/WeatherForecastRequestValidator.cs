@@ -11,6 +11,7 @@ public class WeatherForecastRequestValidator : AbstractValidator<WeatherForecast
 {
     private static readonly Regex CountryCodeRegex = new(@"^[A-Z]{2}$", RegexOptions.Compiled);
     private const int MaxFutureDays = 7;
+    private const  int MaxPastDays = 60;
 
     public WeatherForecastRequestValidator()
     {
@@ -23,7 +24,7 @@ public class WeatherForecastRequestValidator : AbstractValidator<WeatherForecast
             .Must(BeValidCountryCode).WithMessage("Country must be a 2-letter uppercase ISO 3166-1 alpha-2 code (e.g., 'US', 'GB').");
 
         RuleFor(x => x.Date)
-            .Must(BeWithinAllowedRange).WithMessage($"Date must not be more than {MaxFutureDays} days in the future. Past dates are allowed.");
+            .Must(BeWithinAllowedRange).WithMessage($"Date must not be more than {MaxFutureDays} days in the future. Past dates limit is {MaxPastDays} days.");
     }
 
     private bool BeValidCountryCode(string country)
@@ -35,8 +36,8 @@ public class WeatherForecastRequestValidator : AbstractValidator<WeatherForecast
     {
         var today = DateTime.UtcNow.Date;
         var maxFutureDate = today.AddDays(MaxFutureDays);
+        var maxPastDate = today.AddDays(MaxPastDays * -1); 
         
-        // Allow any past date, but limit future dates to +7 days
-        return date.Date <= maxFutureDate;
+        return date.Date <= maxFutureDate && date.Date >= maxPastDate;
     }
 }

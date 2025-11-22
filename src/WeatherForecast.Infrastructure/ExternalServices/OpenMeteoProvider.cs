@@ -21,6 +21,7 @@ public class OpenMeteoProvider : IWeatherSourceProvider
     private readonly ILogger<OpenMeteoProvider> _logger;
     private readonly WeatherSourceOptions _options;
     private readonly ResiliencePipeline _resiliencePipeline;
+        private readonly ICoordinatesProvider _coordinatesProvider;
 
     public const string SourceProviderName = "OpenMeteo";
     public string SourceName => SourceProviderName;
@@ -29,16 +30,19 @@ public class OpenMeteoProvider : IWeatherSourceProvider
         IHttpClientFactory httpClientFactory,
         IOptionsMonitor<WeatherSourceOptions> options,
         [FromKeyedServices(SourceProviderName)] ResiliencePipeline resiliencePipeline,
+        ICoordinatesProvider coordinatesProvider,
         ILogger<OpenMeteoProvider> logger)
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(resiliencePipeline);
+        ArgumentNullException.ThrowIfNull(coordinatesProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
         _httpClient = httpClientFactory.CreateClient(nameof(OpenMeteoProvider));
-        _options = options.Get(SourceName);
+        _options = options.Get(SourceProviderName);
         _resiliencePipeline = resiliencePipeline;
+        _coordinatesProvider = coordinatesProvider;
         _logger = logger;
 
         _httpClient.BaseAddress = new Uri(_options.BaseUrl);
@@ -55,7 +59,7 @@ public class OpenMeteoProvider : IWeatherSourceProvider
             _logger.LogDebug("Fetching weather from {SourceName} for {Location} on {Date}", 
                 SourceName, location, date.ToString("yyyy-MM-dd"));
 
-            var (latitude, longitude) = await GetCoordinatesAsync(location, cancellationToken);
+            var (latitude, longitude) = await _coordinatesProvider.GetCoordinatesAsync(location, cancellationToken);
             
             var url = $"/v1/forecast?latitude={latitude}&longitude={longitude}&daily=temperature_2m_mean,relative_humidity_2m_mean&timezone=auto&start_date={date:yyyy-MM-dd}&end_date={date:yyyy-MM-dd}";
 
@@ -91,27 +95,5 @@ public class OpenMeteoProvider : IWeatherSourceProvider
             _logger.LogError(ex, "Error fetching weather from {SourceName}", SourceName);
             return new ForecastSource(SourceName, null, null, false, ex.Message, DateTime.UtcNow);
         }
-    }
-
-    private async Task<(decimal latitude, decimal longitude)> GetCoordinatesAsync(
-        Location location,
-        CancellationToken cancellationToken)
-    {
-        var url = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(location.City)}&count=1&language=en&format=json";
-        
-        var response = await _resiliencePipeline.ExecuteAsync(async ct => 
-            await _httpClient.GetAsync(url, ct), cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync(cancellationToken);
-        var data = JsonDocument.Parse(content);
-        
-        var results = data.RootElement.GetProperty("results");
-        var firstResult = results.EnumerateArray().FirstOrDefault();
-
-        var latitude = firstResult.GetProperty("latitude").GetDecimal();
-        var longitude = firstResult.GetProperty("longitude").GetDecimal();
-
-        return (latitude, longitude);
     }
 }
