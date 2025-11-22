@@ -14,7 +14,7 @@ status: Planned
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
 | TASK-041 | Install NuGet packages in Infrastructure: `Microsoft.Extensions.Http.Polly`, `StackExchange.Redis`, `Microsoft.Extensions.Caching.Memory`, `Polly` | | |
-| TASK-042 | Create `WeatherSourceOptions` in `src/WeatherForecast.Infrastructure/Configuration/WeatherSourceOptions.cs` with BaseUrl, ApiKey, Enabled, TimeoutSeconds properties | | |
+| TASK-042 | Create `WeatherSourceOptions` in `src/WeatherForecast.Infrastructure/Configuration/WeatherSourceOptions.cs` with BaseUrl, ApiKey, TimeoutSeconds, CacheDurationMinutes properties | | |
 | TASK-043 | Create `OpenMeteoProvider` in `src/WeatherForecast.Infrastructure/ExternalServices/OpenMeteoProvider.cs` implementing `IWeatherSourceProvider` | | |
 | TASK-044 | Implement OpenMeteo API integration: endpoint `https://api.open-meteo.com/v1/forecast`, parameters: latitude, longitude (from geocoding), date, temperature_2m, relative_humidity_2m | | |
 | TASK-045 | Create `WeatherApiProvider` in `src/WeatherForecast.Infrastructure/ExternalServices/WeatherApiProvider.cs` implementing `IWeatherSourceProvider` | | |

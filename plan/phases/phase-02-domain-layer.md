@@ -21,5 +21,5 @@ status: Planned
 | TASK-019 | Create `ForecastSource` entity in `src/WeatherForecast.Domain/Entities/ForecastSource.cs` with properties: Name, SourceType, Temperature, Humidity, Available, Error, RetrievedAt | | |
 | TASK-020 | Create `WeatherForecast` aggregate root in `src/WeatherForecast.Domain/Entities/WeatherForecast.cs` with Location, Date, Sources (List<ForecastSource>), methods: AddSource, CalculateAverage | | |
 | TASK-021 | Create `IWeatherRepository` interface in `src/WeatherForecast.Domain/Interfaces/IWeatherRepository.cs` with method: `Task<WeatherForecast?> GetForecastAsync(Location, DateTime, CancellationToken)` | | |
-| TASK-022 | Create `ICacheRepository` interface in `src/WeatherForecast.Domain/Interfaces/ICacheRepository.cs` with methods: `Task<T?> GetAsync<T>`, `Task SetAsync<T>`, `Task RemoveAsync` | | |
+
 
