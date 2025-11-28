@@ -9,7 +9,7 @@ services:
     # add restart policy to ensure the container restarts on failure for docker swarm
     deploy:
       restart_policy:
-        condition: on-failure
+        condition: any
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       WeatherSources__OpenMeteo__Enabled: "true"
